@@ -12,6 +12,9 @@ import org.springframework.stereotype.Component;
 import java.util.Queue;
 import java.util.concurrent.*;
 
+/**
+ * Implementation of Queue Executor Service
+ */
 @Component
 public class QueueExecutorService implements IQueueExecutorService {
 
@@ -21,7 +24,7 @@ public class QueueExecutorService implements IQueueExecutorService {
 
     private final ExecutorService mExecutorService;
 
-    private final Queue<QueueTaskObject> mQueue = new LinkedBlockingQueue<>();
+    private final LinkedBlockingQueue<QueueTaskObject> mQueue = new LinkedBlockingQueue<>();
 
     private boolean isQueueEnabled = true;
 
@@ -30,7 +33,7 @@ public class QueueExecutorService implements IQueueExecutorService {
 
         mExecutorService = Executors.newFixedThreadPool(MaxQueueProcessors);
 
-        mLogger.info("Starting executor queue with %s processors", MaxQueueProcessors);
+        mLogger.info("Starting executor queue with {} processors", MaxQueueProcessors);
 
         for (int i = 0; i < MaxQueueProcessors; i++) {
             mExecutorService.execute(buildQueueProcessor());
@@ -48,7 +51,7 @@ public class QueueExecutorService implements IQueueExecutorService {
 
     public void enqueueTask(QueueTaskObject runnable) {
         synchronized (mQueue) {
-            mLogger.trace("Adding runnable in queue from class %s", runnable.getSender().getSimpleName());
+            mLogger.trace("Adding runnable in queue from class {}", runnable.getSender().getSimpleName());
             mQueue.add(runnable);
         }
     }
@@ -56,13 +59,22 @@ public class QueueExecutorService implements IQueueExecutorService {
     private Runnable buildQueueProcessor() {
         return () -> {
             while (isQueueEnabled) {
-                QueueTaskObject obj = mQueue.poll();
 
-                if (obj != null) {
-                    mLogger.debug("%s - Found new task (Queue size is: %s)", Thread.currentThread().getName(), mQueue.size());
+                try
+                {
+                    QueueTaskObject obj = mQueue.take();
 
-                    ExecuteQueueTask(obj);
+
+                    if (obj != null) {
+                        mLogger.debug("{} - Found new task (Queue size is: {})", Thread.currentThread().getName(), mQueue.size());
+                        ExecuteQueueTask(obj);
+                    }
                 }
+                catch (Exception ex)
+                {
+
+                }
+
             }
         };
     }
@@ -71,7 +83,7 @@ public class QueueExecutorService implements IQueueExecutorService {
         try {
             queueTaskObject.getRunnable().run();
         } catch (Exception ex) {
-            mLogger.error("%s - Error during executing task %s => %s", Thread.currentThread().getName(), queueTaskObject.getSender().getSimpleName(), ex.getMessage());
+            mLogger.error("{} - Error during executing task {} => {}", Thread.currentThread().getName(), queueTaskObject.getSender().getSimpleName(), ex.getMessage());
         }
     }
 

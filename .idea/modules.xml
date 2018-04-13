@@ -3,10 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/cube.iml" filepath="$PROJECT_DIR$/.idea/modules/cube.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/cube.iml" filepath="$PROJECT_DIR$/.idea/modules/cube.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/cube_main.iml" filepath="$PROJECT_DIR$/.idea/modules/cube_main.iml" group="cube" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/cube_main.iml" filepath="$PROJECT_DIR$/.idea/modules/cube_main.iml" group="cube" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/cube_test.iml" filepath="$PROJECT_DIR$/.idea/modules/cube_test.iml" group="cube" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/cube_test.iml" filepath="$PROJECT_DIR$/.idea/modules/cube_test.iml" group="cube" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/cubeapi/cubeapi.iml" filepath="$PROJECT_DIR$/.idea/modules/cubeapi/cubeapi.iml" group="cubeapi" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/cubeapi/cubeapi_main.iml" filepath="$PROJECT_DIR$/.idea/modules/cubeapi/cubeapi_main.iml" group="cubeapi" />
