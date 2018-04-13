@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/cube.iml" filepath="$PROJECT_DIR$/.idea/modules/cube.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/cube.iml" filepath="$PROJECT_DIR$/.idea/modules/cube.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/cube_main.iml" filepath="$PROJECT_DIR$/.idea/modules/cube_main.iml" group="cube" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/cube_main.iml" filepath="$PROJECT_DIR$/.idea/modules/cube_main.iml" group="cube" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/cube_test.iml" filepath="$PROJECT_DIR$/.idea/modules/cube_test.iml" group="cube" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/cube_test.iml" filepath="$PROJECT_DIR$/.idea/modules/cube_test.iml" group="cube" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/cubeapi/cubeapi.iml" filepath="$PROJECT_DIR$/.idea/modules/cubeapi/cubeapi.iml" group="cubeapi" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/cubeapi/cubeapi_main.iml" filepath="$PROJECT_DIR$/.idea/modules/cubeapi/cubeapi_main.iml" group="cubeapi" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/cubeapi/cubeapi_test.iml" filepath="$PROJECT_DIR$/.idea/modules/cubeapi/cubeapi_test.iml" group="cubeapi" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/cubemediaserver/cubemediaserver.iml" filepath="$PROJECT_DIR$/.idea/modules/cubemediaserver/cubemediaserver.iml" group="cubemediaserver" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/cubemediaserver/cubemediaserver_main.iml" filepath="$PROJECT_DIR$/.idea/modules/cubemediaserver/cubemediaserver_main.iml" group="cubemediaserver" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/cubemediaserver/cubemediaserver_main~1.iml" filepath="$PROJECT_DIR$/.idea/modules/cubemediaserver/cubemediaserver_main~1.iml" group="cubemediaserver" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/cubemediaserver/cubemediaserver_test.iml" filepath="$PROJECT_DIR$/.idea/modules/cubemediaserver/cubemediaserver_test.iml" group="cubemediaserver" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/cubemediaserver/cubemediaserver_test~1.iml" filepath="$PROJECT_DIR$/.idea/modules/cubemediaserver/cubemediaserver_test~1.iml" group="cubemediaserver" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/cubemediaserver/cubemediaserver~1.iml" filepath="$PROJECT_DIR$/.idea/modules/cubemediaserver/cubemediaserver~1.iml" group="cubemediaserver" />
+    </modules>
+  </component>
+</project>

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CompilerConfiguration">
+    <bytecodeTargetLevel>
+      <module name="cube_main" target="1.9" />
+      <module name="cube_test" target="1.9" />
+      <module name="cubeapi_main" target="1.9" />
+      <module name="cubeapi_test" target="1.9" />
+      <module name="cubemediaserver" target="1.8" />
+      <module name="cubemediaserver_main" target="1.8" />
+      <module name="cubemediaserver_main~1" target="1.8" />
+      <module name="cubemediaserver_test" target="1.8" />
+      <module name="cubemediaserver_test~1" target="1.8" />
+    </bytecodeTargetLevel>
+  </component>
+</project>
