@@ -5,7 +5,9 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 
@@ -16,13 +18,13 @@ public class ConfigEntity extends BaseEntity {
 
     String language;
 
-    Map<String, String> directories;
+    List<DirectoryEntryEntity> directories;
 
     /**
      * ctor
      */
     public ConfigEntity() {
-        directories = new HashMap<>();
+        directories = new ArrayList<>();
     }
 
     /**
@@ -31,7 +33,13 @@ public class ConfigEntity extends BaseEntity {
      * @param name
      * @param directory
      */
-    public void addDirectory(String name, String directory) {
-        directories.put(name, directory);
+    public void addDirectory(String name, String directory, MediaFileTypeEnum type) {
+        DirectoryEntryEntity entry = new DirectoryEntryEntity();
+
+        entry.setDirectory(directory);
+        entry.setName(name);
+        entry.setMediaType(type);
+
+        directories.add(entry);
     }
 }

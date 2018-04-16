@@ -1,6 +1,7 @@
 package com.github.tgiachi.cubemediaserver.interfaces.mediaparser;
 
 
+import com.github.tgiachi.cubemediaserver.data.events.media.InputMediaFileEvent;
 import com.github.tgiachi.cubemediaserver.data.media.ParsedMediaObject;
 
 import java.util.concurrent.Future;
@@ -11,9 +12,9 @@ import java.util.concurrent.Future;
 public interface IMediaParser {
 
     /**
-     * Parse media
-     * @param filename
+     * Scan file
+     * @param inputMediaFileEvent
      * @return
      */
-    Future<ParsedMediaObject> Parse(String filename);
+    Future<ParsedMediaObject> Parse(InputMediaFileEvent inputMediaFileEvent);
 }

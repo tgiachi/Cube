@@ -4,6 +4,7 @@ buildscript {
 	}
 	repositories {
 		mavenCentral()
+
 	}
 	dependencies {
 		classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
@@ -21,6 +22,7 @@ sourceCompatibility = 1.9
 
 repositories {
 	mavenCentral()
+    jcenter()
 	maven { url "https://repo.spring.io/milestone" }
 }
 
@@ -33,7 +35,10 @@ dependencies {
 	compile('org.springframework.shell:spring-shell-starter:2.0.0.RELEASE')
 	compile('io.springfox:springfox-swagger2:2.8.0')
 	compile('io.springfox:springfox-swagger-ui:2.8.0')
+    compile group: 'commons-io', name: 'commons-io', version: '2.6'
 	compile('javax.xml.bind:jaxb-api:2.2.8')
+    compile('info.movito:themoviedbapi:1.7')
+
     compile group: 'javax.xml.ws', name: 'jaxws-api', version: '2.3.0'
 	compileOnly('org.projectlombok:lombok')
 	testCompile('org.springframework.boot:spring-boot-starter-test')

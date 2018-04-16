@@ -20,7 +20,7 @@ public class QueueExecutorService implements IQueueExecutorService {
 
     private final Logger mLogger = LoggerFactory.getLogger(QueueExecutorService.class);
 
-    private final int MaxQueueProcessors = 5;
+    private  int MaxQueueProcessors = 0;
 
     private final ExecutorService mExecutorService;
 
@@ -30,6 +30,8 @@ public class QueueExecutorService implements IQueueExecutorService {
 
 
     public QueueExecutorService() {
+
+        MaxQueueProcessors = Runtime.getRuntime().availableProcessors();
 
         mExecutorService = Executors.newFixedThreadPool(MaxQueueProcessors);
 
