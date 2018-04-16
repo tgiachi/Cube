@@ -131,7 +131,6 @@ public class VideoMediaParser implements IMediaParser {
             movieEntity.setMovieDbId(movie.getId());
 
             moviesRepository.save(movieEntity);
-
         }
     }
 

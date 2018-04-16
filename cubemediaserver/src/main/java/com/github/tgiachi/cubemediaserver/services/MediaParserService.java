@@ -13,7 +13,9 @@ import com.github.tgiachi.cubemediaserver.repositories.ConfigRepository;
 import com.github.tgiachi.cubemediaserver.utils.EventBusUtils;
 import com.github.tgiachi.cubemediaserver.utils.ReflectionUtils;
 import com.google.common.eventbus.Subscribe;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.io.filefilter.IOFileFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,9 +61,7 @@ public class MediaParserService implements IMediaParserService {
     private HashMap<String, List<Class<?>>> mMediaParsers;
 
 
-
-    public MediaParserService()
-    {
+    public MediaParserService() {
         mMediaParsers = new HashMap<>();
     }
 
@@ -172,7 +172,7 @@ public class MediaParserService implements IMediaParserService {
                 MediaParser ann = classz.getAnnotation(MediaParser.class);
 
 
-                for (String ext: ann.extensions()) {
+                for (String ext : ann.extensions()) {
 
                     if (!mMediaParsers.containsKey(ext))
                         mMediaParsers.put(ext, new ArrayList<>());
@@ -200,37 +200,29 @@ public class MediaParserService implements IMediaParserService {
 
             String ext = FilenameUtils.getExtension(inputMediaFileEvent.getFilename());
 
-            if (mMediaParsers.containsKey(ext))
-            {
+            if (mMediaParsers.containsKey(ext)) {
                 List<Class<?>> parsers = mMediaParsers.get(ext);
 
                 mLogger.info("Found {} media parsers for extension {}", parsers.size(), ext);
 
-                for (Class<?> parser : parsers)
-                {
-                    try
-                    {
+                for (Class<?> parser : parsers) {
+                    try {
                         IMediaParser mediaParser = (IMediaParser) mApplicationContext.getBean(parser);
 
                         Future<ParsedMediaObject> fOut = mediaParser.Parse(inputMediaFileEvent);
 
-                        mQueueExecutorService.enqueueTask(new QueueTaskObject().Build(this.getClass(), () ->{
+                        mQueueExecutorService.enqueueTask(new QueueTaskObject().Build(this.getClass(), () -> {
 
-                            try
-                            {
-                                ParsedMediaObject parsedMediaObject =  fOut.get();
-                            }
-                            catch (Exception ex)
-                            {
+                            try {
+                                ParsedMediaObject parsedMediaObject = fOut.get();
+                            } catch (Exception ex) {
 
                             }
 
 
                         }));
 
-                    }
-                    catch (Exception ex)
-                    {
+                    } catch (Exception ex) {
                         ex.printStackTrace();
                     }
 
@@ -244,6 +236,21 @@ public class MediaParserService implements IMediaParserService {
         }
     }
 
+
+    public void fullScanDirectory(DirectoryEntryEntity directoryEntryEntity) {
+
+        Collection<File> files = FileUtils.listFiles(new File(directoryEntryEntity.getDirectory()), null, true);
+
+        files.forEach(file -> {
+            InputMediaFileEvent event = new InputMediaFileEvent();
+            event.setDirectoryEntry(directoryEntryEntity);
+            event.setFilename(FilenameUtils.getName(file.getName()));
+            event.setMediaType(directoryEntryEntity.getMediaType());
+            event.setFullPathFileName(file.getName());
+            broadcastInputEvent(event);
+        });
+
+    }
 
 
     private void registerBean(Class<?> classz) {
