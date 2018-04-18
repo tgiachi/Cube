@@ -1,16 +1,19 @@
 package com.github.tgiachi.cubemediaserver.mediaparsers;
 
 import com.github.tgiachi.cubemediaserver.annotations.MediaParser;
+import com.github.tgiachi.cubemediaserver.data.events.ffmpeg.MediaInfoEvent;
 import com.github.tgiachi.cubemediaserver.data.events.media.InputMediaFileEvent;
 import com.github.tgiachi.cubemediaserver.data.media.ParsedMediaObject;
 import com.github.tgiachi.cubemediaserver.entities.MediaFileTypeEnum;
 import com.github.tgiachi.cubemediaserver.entities.MovieEntity;
 import com.github.tgiachi.cubemediaserver.interfaces.mediaparser.IMediaParser;
+import com.github.tgiachi.cubemediaserver.interfaces.services.IFFMpegService;
 import com.github.tgiachi.cubemediaserver.repositories.MoviesRepository;
 import info.movito.themoviedbapi.TmdbApi;
 import info.movito.themoviedbapi.TmdbMovies;
 import info.movito.themoviedbapi.model.MovieDb;
 import info.movito.themoviedbapi.model.core.MovieResultsPage;
+import net.bramp.ffmpeg.probe.FFmpegProbeResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +25,7 @@ import java.util.concurrent.Future;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-@MediaParser(extensions = {"avi"})
+@MediaParser(extensions = {"avi", "mkv"})
 public class VideoMediaParser implements IMediaParser {
 
     @Value("${moviedb.apikey}")
@@ -34,6 +37,9 @@ public class VideoMediaParser implements IMediaParser {
 
     @Autowired
     public MoviesRepository moviesRepository;
+
+    @Autowired
+    public IFFMpegService iffMpegService;
 
 
     final String regex = "^\n"
@@ -84,8 +90,10 @@ public class VideoMediaParser implements IMediaParser {
     private ParsedMediaObject scanMovie(InputMediaFileEvent inputMediaFileEvent) {
 
         final Matcher matcher = mMoviePattern.matcher(inputMediaFileEvent.getFilename());
-        ParsedMediaObject out = new ParsedMediaObject();
 
+        ParsedMediaObject out = new ParsedMediaObject();
+        out.setMediaType(inputMediaFileEvent.getMediaType());
+        out.setFilename(inputMediaFileEvent.getFullPathFileName());
 
 
         if (matcher.find()) {
@@ -97,41 +105,50 @@ public class VideoMediaParser implements IMediaParser {
                 title = title.replace(separator, " ");
             }
 
+
+            MediaInfoEvent result = iffMpegService.getMediaInformation(inputMediaFileEvent.getFullPathFileName());
+
+            mLogger.info("{} HW: {}x{} => Duration: {} seconds,  Codec: {} ", inputMediaFileEvent.getFilename(), result.getWidth(), result.getHeight(), result.getDuration(), result.getCodec());
+
+
             Integer yearInt = year != "" ? Integer.parseInt(year) : null;
 
             MovieResultsPage resultsPage = mTmdbApi.getSearch().searchMovie(title, yearInt, "it", true, 1);
 
-            if (resultsPage.getTotalPages() > 0)
-            {
+            if (resultsPage.getTotalPages() > 0) {
                 mLogger.info("Found on TvMovieDb correlation between {} -> {}", inputMediaFileEvent.getFilename(), resultsPage.getResults().get(0).getTitle());
 
-                MovieDb movie =  resultsPage.getResults().get(0);
+                MovieDb movie = resultsPage.getResults().get(0);
 
-                saveMovieOnDb(movie, inputMediaFileEvent);
+                String mediaId = saveMovieOnDb(movie, inputMediaFileEvent, result.getWidth(), result.getHeight());
+
+                out.setMediaId(mediaId);
 
                 out.setSavedOnDb(true);
 
             }
-
         }
         return out;
 
     }
 
-    private void saveMovieOnDb(MovieDb movie, InputMediaFileEvent inputMediaFileEvent)
-    {
-        if (moviesRepository.findByTitle(movie.getTitle()) == null)
-        {
-
+    private String saveMovieOnDb(MovieDb movie, InputMediaFileEvent inputMediaFileEvent, int width, int height) {
+        if (moviesRepository.findByTitle(movie.getTitle()) == null) {
             MovieEntity movieEntity = new MovieEntity();
 
             movieEntity.setTitle(movie.getTitle());
             movieEntity.setFilename(inputMediaFileEvent.getFullPathFileName());
             movieEntity.setDirectoryEntry(inputMediaFileEvent.getDirectoryEntry().getDirectory());
             movieEntity.setMovieDbId(movie.getId());
+            movieEntity.setWidth(width);
+            movieEntity.setHeight(height);
 
             moviesRepository.save(movieEntity);
+
+            return movieEntity.getUid();
         }
+
+        return "";
     }
 
     private ParsedMediaObject scanTvSeries(InputMediaFileEvent inputMediaFileEvent) {

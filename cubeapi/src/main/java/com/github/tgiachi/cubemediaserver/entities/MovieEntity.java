@@ -29,6 +29,10 @@ public class MovieEntity extends BaseEntity {
 
     int movieDbId;
 
+    int width;
+
+    int height;
+
     public MovieEntity()
     {
         uid = UUID.randomUUID().toString().replace("-", "");

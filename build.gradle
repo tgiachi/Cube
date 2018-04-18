@@ -17,9 +17,10 @@ dependencies {
 }
 
 project.ext {
-    springVersion = '5.0.5.RELEASE'
+    springVersion = '2.0.5.RELEASE'
     reflectionsVersion = '0.9.11'
     lombokVersion = '1.16.20'
+    swaggerVersion = '2.8.0'
 }
 
 project(':cubemediaserver')

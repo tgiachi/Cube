@@ -19,8 +19,7 @@ public class ConfigController {
 
 
     @RequestMapping(value = "/watched/directories", method = RequestMethod.GET)
-    public List<DirectoryEntryEntity> getWatchedDirectoies()
-    {
+    public List<DirectoryEntryEntity> getWatchedDirectoies() {
         ConfigEntity config = configRepository.findAll().get(0);
 
         return config.getDirectories();
@@ -28,14 +27,12 @@ public class ConfigController {
 
 
     @RequestMapping(value = "/add/directory", method = RequestMethod.POST)
-    public boolean addDirectoryToWatch(@RequestParam("name") String name,  @RequestParam("directory") String directory, @RequestParam("mediaType") MediaFileTypeEnum mediaType)
-    {
+    public boolean addDirectoryToWatch(@RequestParam("name") String name, @RequestParam("directory") String directory, @RequestParam("mediaType") MediaFileTypeEnum mediaType) {
         ConfigEntity config = configRepository.findAll().get(0);
 
         long exists = config.getDirectories().stream().filter(s -> s.getDirectory().equals(directory)).count();
 
-        if (exists == 0)
-        {
+        if (exists == 0) {
             DirectoryEntryEntity entryEntity = new DirectoryEntryEntity();
             entryEntity.setDirectory(directory);
             entryEntity.setMediaType(mediaType);
@@ -46,13 +43,8 @@ public class ConfigController {
             configRepository.save(config);
 
             return true;
-        }
-        else
-        {
+        } else {
             return false;
         }
-
-
-
     }
 }

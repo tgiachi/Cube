@@ -3,6 +3,7 @@ package com.github.tgiachi.cubemediaserver.services;
 import com.github.tgiachi.cubemediaserver.annotations.MediaParser;
 import com.github.tgiachi.cubemediaserver.data.QueueTaskObject;
 import com.github.tgiachi.cubemediaserver.data.events.media.InputMediaFileEvent;
+import com.github.tgiachi.cubemediaserver.data.events.media.MediaAddedEvent;
 import com.github.tgiachi.cubemediaserver.data.media.ParsedMediaObject;
 import com.github.tgiachi.cubemediaserver.entities.ConfigEntity;
 import com.github.tgiachi.cubemediaserver.entities.DirectoryEntryEntity;
@@ -15,7 +16,6 @@ import com.github.tgiachi.cubemediaserver.utils.ReflectionUtils;
 import com.google.common.eventbus.Subscribe;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.io.filefilter.IOFileFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +23,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.support.GenericWebApplicationContext;
-
 
 import javax.annotation.PostConstruct;
 import java.io.File;
@@ -43,9 +42,11 @@ public class MediaParserService implements IMediaParserService {
     @Autowired
     public ApplicationContext mApplicationContext;
 
-
     @Autowired
     public ConfigRepository mConfigRepository;
+
+    @Autowired
+    public EventListenerService eventListenerService;
 
     private Thread mWatchThread;
 
@@ -68,16 +69,14 @@ public class MediaParserService implements IMediaParserService {
     @PostConstruct
     public void init() {
 
-        subscriveEvents();
+        subscribeEvents();
 
         scanMediaParsers();
         loadConfig();
         initFileWatchers();
-
-
     }
 
-    private void subscriveEvents() {
+    private void subscribeEvents() {
         EventBusUtils.getSingleton().register(this);
     }
 
@@ -89,6 +88,7 @@ public class MediaParserService implements IMediaParserService {
             configEntity = new ConfigEntity();
 
             configEntity.setLanguage(locale.getLanguage());
+            configEntity.getSubtitlesLanguages().add(locale.getLanguage());
 
             mConfigRepository.save(configEntity);
         } else {
@@ -215,20 +215,27 @@ public class MediaParserService implements IMediaParserService {
 
                             try {
                                 ParsedMediaObject parsedMediaObject = fOut.get();
+
+                                if (parsedMediaObject != null) {
+
+                                    MediaAddedEvent mediaAddedEvent = new MediaAddedEvent();
+                                    mediaAddedEvent.setMediaId(parsedMediaObject.getMediaId());
+                                    mediaAddedEvent.setOutput(parsedMediaObject);
+
+                                    eventListenerService.publishEvent(mediaAddedEvent);
+                                    EventBusUtils.getSingleton().broadcast(mediaAddedEvent);
+                                }
+
+
                             } catch (Exception ex) {
 
                             }
-
-
                         }));
 
                     } catch (Exception ex) {
                         ex.printStackTrace();
                     }
-
-
                 }
-
             }
 
         } catch (Exception ex) {
@@ -249,7 +256,6 @@ public class MediaParserService implements IMediaParserService {
             event.setFullPathFileName(file.getName());
             broadcastInputEvent(event);
         });
-
     }
 
 

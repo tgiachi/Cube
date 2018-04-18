@@ -61,11 +61,9 @@ public class QueueExecutorService implements IQueueExecutorService {
     private Runnable buildQueueProcessor() {
         return () -> {
             while (isQueueEnabled) {
-
                 try
                 {
                     QueueTaskObject obj = mQueue.take();
-
 
                     if (obj != null) {
                         mLogger.debug("{} - Found new task (Queue size is: {})", Thread.currentThread().getName(), mQueue.size());
@@ -76,7 +74,6 @@ public class QueueExecutorService implements IQueueExecutorService {
                 {
 
                 }
-
             }
         };
     }

@@ -3,6 +3,9 @@ buildscript {
 		springBootVersion = '2.0.1.RELEASE'
 	}
 	repositories {
+        maven {
+            url 'https://oss.sonatype.org/content/repositories/snapshots/'
+        }
 		mavenCentral()
 
 	}
@@ -33,11 +36,15 @@ dependencies {
 	compile('org.springframework.boot:spring-boot-starter-web')
 	compile('org.springframework.boot:spring-boot-starter-websocket')
 	compile('org.springframework.shell:spring-shell-starter:2.0.0.RELEASE')
-	compile('io.springfox:springfox-swagger2:2.8.0')
-	compile('io.springfox:springfox-swagger-ui:2.8.0')
+	compile("io.springfox:springfox-swagger2:${swaggerVersion}")
+	compile("io.springfox:springfox-swagger-ui:${swaggerVersion}")
     compile group: 'commons-io', name: 'commons-io', version: '2.6'
 	compile('javax.xml.bind:jaxb-api:2.2.8')
     compile('info.movito:themoviedbapi:1.7')
+    compile("net.bramp.ffmpeg:ffmpeg:0.6.2")
+
+    compile 'com.github.wtekiela:opensub4j:0.2.0-SNAPSHOT'
+
 
     compile group: 'javax.xml.ws', name: 'jaxws-api', version: '2.3.0'
 	compileOnly('org.projectlombok:lombok')

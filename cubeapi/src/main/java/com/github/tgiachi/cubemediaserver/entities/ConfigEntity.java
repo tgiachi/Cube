@@ -6,10 +6,7 @@ import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-
 
 @Data
 @EqualsAndHashCode(callSuper = false)
@@ -20,11 +17,16 @@ public class ConfigEntity extends BaseEntity {
 
     List<DirectoryEntryEntity> directories;
 
+    String ffmpegBinDirectory;
+
+    List<String> subtitlesLanguages;
+
     /**
      * ctor
      */
     public ConfigEntity() {
         directories = new ArrayList<>();
+        subtitlesLanguages = new ArrayList<>();
     }
 
     /**
