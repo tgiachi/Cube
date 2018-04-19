@@ -207,13 +207,14 @@ public class MediaParserService implements IMediaParserService {
 
                 for (Class<?> parser : parsers) {
                     try {
-                        IMediaParser mediaParser = (IMediaParser) mApplicationContext.getBean(parser);
-
-                        Future<ParsedMediaObject> fOut = mediaParser.Parse(inputMediaFileEvent);
 
                         mQueueExecutorService.enqueueTask(new QueueTaskObject().Build(this.getClass(), () -> {
 
                             try {
+                                IMediaParser mediaParser = (IMediaParser) mApplicationContext.getBean(parser);
+
+                                Future<ParsedMediaObject> fOut = mediaParser.Parse(inputMediaFileEvent);
+
                                 ParsedMediaObject parsedMediaObject = fOut.get();
 
                                 if (parsedMediaObject != null) {
@@ -225,8 +226,6 @@ public class MediaParserService implements IMediaParserService {
                                     eventListenerService.publishEvent(mediaAddedEvent);
                                     EventBusUtils.getSingleton().broadcast(mediaAddedEvent);
                                 }
-
-
                             } catch (Exception ex) {
 
                             }

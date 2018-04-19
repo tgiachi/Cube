@@ -152,7 +152,7 @@ public class FFMpegService implements IFFMpegService {
     private boolean isFFMpegInstalled() {
         ConfigEntity entity = configRepository.findAll().get(0);
 
-        return entity.getFfmpegBinDirectory() != null;
+        return entity.getFfmpegBinDirectory() != null || entity.getFfmpegBinDirectory() != "";
     }
 
     private FFmpeg getFFMpegInstance() {

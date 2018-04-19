@@ -1,8 +1,10 @@
 package com.github.tgiachi.cubemediaserver.services;
 
 import com.github.tgiachi.cubemediaserver.annotations.MediaEventListener;
+import com.github.tgiachi.cubemediaserver.data.QueueTaskObject;
 import com.github.tgiachi.cubemediaserver.interfaces.eventlistener.IEventListener;
 import com.github.tgiachi.cubemediaserver.interfaces.services.IEventListenerService;
+import com.github.tgiachi.cubemediaserver.utils.EventBusUtils;
 import com.github.tgiachi.cubemediaserver.utils.ReflectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,22 +48,17 @@ public class EventListenerService implements IEventListenerService {
 
 
     @Override
-    public void publishEvent(Object obj)
-    {
-        if (mListeners.containsKey(obj.getClass()))
-        {
+    public void publishEvent(Object obj) {
+
+        if (mListeners.containsKey(obj.getClass())) {
             List<Class<?>> classes = mListeners.get(obj.getClass());
 
             classes.parallelStream().forEach(s -> {
 
-                IEventListener listener = (IEventListener)mApplicationContext.getBean(s);
-
+                IEventListener listener = (IEventListener) mApplicationContext.getBean(s);
                 listener.onEvent(obj);
-
             });
-
         }
-
 
     }
 
@@ -71,14 +68,14 @@ public class EventListenerService implements IEventListenerService {
             MediaEventListener ann = classz.getAnnotation(MediaEventListener.class);
 
             for (Class<?> c : ann.eventClasses()) {
-               // if (IEventListener.class.isAssignableFrom(c)) {
+                // if (IEventListener.class.isAssignableFrom(c)) {
 
-                    if (!mListeners.containsKey(c))
-                        mListeners.put(c, new ArrayList<>());
+                if (!mListeners.containsKey(c))
+                    mListeners.put(c, new ArrayList<>());
 
-                    mListeners.get(c).add(classz);
-                    mLogger.info("Registering class {} for event {}", classz.getSimpleName(), c.getSimpleName());
-           //     }
+                mListeners.get(c).add(classz);
+                mLogger.info("Registering class {} for event {}", classz.getSimpleName(), c.getSimpleName());
+                //     }
             }
 
             registerBean(classz);

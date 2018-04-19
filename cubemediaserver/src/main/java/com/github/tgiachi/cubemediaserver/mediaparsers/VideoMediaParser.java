@@ -8,12 +8,14 @@ import com.github.tgiachi.cubemediaserver.entities.MediaFileTypeEnum;
 import com.github.tgiachi.cubemediaserver.entities.MovieEntity;
 import com.github.tgiachi.cubemediaserver.interfaces.mediaparser.IMediaParser;
 import com.github.tgiachi.cubemediaserver.interfaces.services.IFFMpegService;
+import com.github.tgiachi.cubemediaserver.repositories.ConfigRepository;
 import com.github.tgiachi.cubemediaserver.repositories.MoviesRepository;
 import info.movito.themoviedbapi.TmdbApi;
 import info.movito.themoviedbapi.TmdbMovies;
 import info.movito.themoviedbapi.model.MovieDb;
 import info.movito.themoviedbapi.model.core.MovieResultsPage;
 import net.bramp.ffmpeg.probe.FFmpegProbeResult;
+import org.apache.commons.io.FilenameUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,36 +43,18 @@ public class VideoMediaParser implements IMediaParser {
     @Autowired
     public IFFMpegService iffMpegService;
 
-
-    final String regex = "^\n"
-            + "(?<title> \n"
-            + "  [-\\w'\\\"]+\n"
-            + "  (?<separator> [ .] ) \n"
-            + "  (?: [-\\w'\\\"]+\\2 )*?\n"
-            + ")\n"
-            + "(?:\n"
-            + "  (?:\n"
-            + "    (?! \\d+ \\2 )\n"
-            + "    (?: s (?: eason \\2? )? )?\n"
-            + "    (?<season> \\d\\d? )\n"
-            + "    (?: e\\d\\d? (?:-e?\\d\\d?)? | x\\d\\d? )? |\n"
-            + "    (?<year> [(\\]]?\\d{4}[)\\]]? ) \n"
-            + "  )\n"
-            + "  (?=\\2) |\n"
-            + "  (?= BOXSET  | XVID   | DIVX | LIMITED   | \n"
-            + "      UNRATED | PROPER | DTS  | AC3 | AAC | BLU[ -]?RAY | \n"
-            + "      HD(?:TV|DVD) | (?:DVD|B[DR]|WEB)RIP | \\d+p |Â [hx]\\.?264\n"
-            + "  )\n"
-            + ")";
+    @Autowired
+    public ConfigRepository configRepository;
 
 
-    final Pattern mMoviePattern = Pattern.compile(regex, Pattern.CASE_INSENSITIVE | Pattern.MULTILINE | Pattern.COMMENTS);
+    final String movieRegex = "(?<title>.*)\\.(?<year>[^\\.]+)\\.(?<pixelsize>[^\\.]+)\\.(?<format>[^\\.]+)\\.(?<formatsize>[^\\.]+)\\.(?<filename>[^\\.]+)\\.(?<extension>[^\\.]+)";
+
+    final Pattern mMoviePattern = Pattern.compile(movieRegex, Pattern.CASE_INSENSITIVE | Pattern.MULTILINE | Pattern.COMMENTS  );
 
 
     @PostConstruct
     public void init() {
         mTmdbApi = new TmdbApi(movieDbApiKey);
-
     }
 
     @Override
@@ -89,7 +73,15 @@ public class VideoMediaParser implements IMediaParser {
 
     private ParsedMediaObject scanMovie(InputMediaFileEvent inputMediaFileEvent) {
 
-        final Matcher matcher = mMoviePattern.matcher(inputMediaFileEvent.getFilename());
+        final String sanitizedFilename = inputMediaFileEvent.getFilename().replace(" ",".");
+
+        final Matcher matcher = mMoviePattern.matcher(sanitizedFilename);
+
+
+        String title = "";
+        String year = "";
+        Integer yearInt = null;
+
 
         ParsedMediaObject out = new ParsedMediaObject();
         out.setMediaType(inputMediaFileEvent.getMediaType());
@@ -97,37 +89,41 @@ public class VideoMediaParser implements IMediaParser {
 
 
         if (matcher.find()) {
-            String title = matcher.group("title");
-            String separator = matcher.group("separator");
-            String year = matcher.group("year");
+            title = matcher.group("title");
+            String separator = ".";
+            year = matcher.group("year");
+            yearInt = year != "" ? Integer.parseInt(year) : null;
 
             if (separator != null) {
                 title = title.replace(separator, " ");
             }
-
-
-            MediaInfoEvent result = iffMpegService.getMediaInformation(inputMediaFileEvent.getFullPathFileName());
-
-            mLogger.info("{} HW: {}x{} => Duration: {} seconds,  Codec: {} ", inputMediaFileEvent.getFilename(), result.getWidth(), result.getHeight(), result.getDuration(), result.getCodec());
-
-
-            Integer yearInt = year != "" ? Integer.parseInt(year) : null;
-
-            MovieResultsPage resultsPage = mTmdbApi.getSearch().searchMovie(title, yearInt, "it", true, 1);
-
-            if (resultsPage.getTotalPages() > 0) {
-                mLogger.info("Found on TvMovieDb correlation between {} -> {}", inputMediaFileEvent.getFilename(), resultsPage.getResults().get(0).getTitle());
-
-                MovieDb movie = resultsPage.getResults().get(0);
-
-                String mediaId = saveMovieOnDb(movie, inputMediaFileEvent, result.getWidth(), result.getHeight());
-
-                out.setMediaId(mediaId);
-
-                out.setSavedOnDb(true);
-
-            }
         }
+
+        MediaInfoEvent result = iffMpegService.getMediaInformation(inputMediaFileEvent.getFullPathFileName());
+
+        mLogger.info("{} HW: {}x{} => Duration: {} seconds,  Codec: {} ", inputMediaFileEvent.getFilename(), result.getWidth(), result.getHeight(), result.getDuration(), result.getCodec());
+
+
+
+        if (title == "")
+           title = inputMediaFileEvent.getFilename().replace("."+FilenameUtils.getExtension(inputMediaFileEvent.getFilename()), "").replace(".", " ");
+
+        MovieResultsPage resultsPage = mTmdbApi.getSearch().searchMovie(title, yearInt, getConfigLanguage(), true, 1);
+
+        if (resultsPage.getTotalPages() > 0) {
+            mLogger.info("Found on TvMovieDb correlation between {} -> {}", inputMediaFileEvent.getFilename(), resultsPage.getResults().get(0).getTitle());
+
+            MovieDb movie = resultsPage.getResults().get(0);
+
+            String mediaId = saveMovieOnDb(movie, inputMediaFileEvent, result.getWidth(), result.getHeight());
+
+            out.setMediaId(mediaId);
+
+            out.setSavedOnDb(true);
+
+        }
+
+        out.setParsed(true);
         return out;
 
     }
@@ -153,5 +149,10 @@ public class VideoMediaParser implements IMediaParser {
 
     private ParsedMediaObject scanTvSeries(InputMediaFileEvent inputMediaFileEvent) {
         return null;
+    }
+
+    private String getConfigLanguage()
+    {
+        return configRepository.findAll().get(0).getLanguage();
     }
 }
